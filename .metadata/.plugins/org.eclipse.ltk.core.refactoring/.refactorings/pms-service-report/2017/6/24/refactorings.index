@@ -1,0 +1,15 @@
+1497495374610	Rename type 'ProjectWorkscheduleReport'
+1497497774306	Rename compilation unit 'ProjectWorkscheduleReportDao.java'
+1497497937236	Delete element
+1497511411093	Rename type 'ProjectWrokscheduleDetail'
+1497598245833	Rename type 'ProjectWorkschedule'
+1497598261818	Delete element
+1497598265456	Delete element
+1497598266417	Delete element
+1497598267541	Delete element
+1497598270031	Delete element
+1497598432278	Rename type 'ProjectWorkscheduleDetail'
+1497600053786	Rename type 'WorkscheduleDetail'
+1497600386817	Rename type 'ProjectWorkscheduleDao'
+1497600394029	Rename type 'ProjectWorkscheduleDaoImpl'
+1497600510694	Rename type 'ProjectWorkscheduleBiz'

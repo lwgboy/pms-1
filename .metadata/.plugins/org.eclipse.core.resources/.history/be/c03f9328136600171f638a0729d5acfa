@@ -1,0 +1,26 @@
+package cn.yesway.pms.core.cast.resource.entity;
+
+import cn.yesway.pms.common.entity.BaseEntity;
+import cn.yesway.pms.core.project.entity.Project;
+
+public class ResourceAmountProjectDetail extends BaseEntity {
+	private Project project;
+	private Integer scala;
+
+	public Project getProject() {
+		return project;
+	}
+
+	public void setProject(Project project) {
+		this.project = project;
+	}
+
+	public Integer getScala() {
+		return scala;
+	}
+
+	public void setScala(Integer scala) {
+		this.scala = scala;
+	}
+
+}

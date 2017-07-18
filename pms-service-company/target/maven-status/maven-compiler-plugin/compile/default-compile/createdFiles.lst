@@ -1,0 +1,4 @@
+cn\yesway\pms\core\company\biz\CompanyBiz.class
+cn\yesway\pms\core\company\entity\Company.class
+cn\yesway\pms\core\company\dao\CompanyDao.class
+cn\yesway\pms\core\company\dao\CompanyDaoImpl.class

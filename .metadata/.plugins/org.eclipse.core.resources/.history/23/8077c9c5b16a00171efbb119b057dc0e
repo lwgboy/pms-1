@@ -1,0 +1,8 @@
+package cn.yesway.pms.core.report.biz;
+
+import org.springframework.stereotype.Component;
+
+@Component("projectReportCastBiz")
+public class ProjectReportCastBiz {
+
+}

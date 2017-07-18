@@ -1,0 +1,5 @@
+package cn.yesway.pms.core.report.biz;
+
+public class ProjectReportCastBiz {
+
+}

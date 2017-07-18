@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.yesway.pms.core.report.dao.ProjectReportCastDaoImpl">
+
+	<resultMap id="projectWorkTimeMap" type="ProjectWorkTime">
+		<result property="employee.id" column="employee_id" />
+		<result property="project.id" column="project_id" />
+		<result property="workTime" column="work_time" />
+	</resultMap>
+
+	<resultMap id="employeeSalaryMap" type="EmployeeSalaryMap">
+		<result property="employee.code" column="employee_code" />
+		<result property="value" column="hourly_salary" />
+	</resultMap>
+
+	<resultMap id="expenseCastMap" type="ProjectExpenseCast">
+		<result property="project.id" column="project_id" />
+		<result property="expense.type" column="expense_type"
+			typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler" javaType="cn.yesway.pms.common.enums.ExpenseType" />
+		<result property="cast" column="after_tax_cast" />
+	</resultMap>
+	
+	<resultMap id="resourceCastMap" type="ProjectResourceCast">
+        <result property="project.code" column="project_code" />
+        <result property="cast" column="after_tax_cast" />
+    </resultMap>
+
+	<select id="selectWorkTime" parameterType="java.util.Map"
+		resultMap="projectWorkTimeMap">
+		select ws.employee_id, wsd.project_id, sum(wsd.work_time) as
+		work_time
+		from pms_workschedule_detail wsd inner join pms_workschedule
+		ws on
+		wsd.workschedule_id = ws.id
+		where ws.create_date between
+		'2017-06-01' and '2017-06-30'
+		group by ws.employee_id, wsd.project_id
+	</select>
+
+	<select id="selectEmployeeSalary" parameterType="java.util.Map"
+		resultMap="employeeSalaryMap">
+		SELECT employee_code, hourly_salary FROM
+		pms_employee_salary_detail esd
+		INNER JOIN pms_employee_salary es ON
+		esd.employee_salary_id = es.id
+		WHERE create_date BETWEEN '2017-06-01'
+		AND '2017-06-30'
+	</select>
+
+	<select id="selectExpenseCast" parameterType="java.util.Map"
+		resultMap="expenseCastMap">
+		SELECT ecd.project_id, e.expense_type, SUM(ecd.after_tax_cast) AS
+		after_tax_cast
+		FROM pms_expense_cast_detail ecd INNER JOIN pms_expense_cast ec ON
+		ecd.expense_cast_id = ec.id
+		INNER JOIN pms_expense e ON ecd.expense_id = e.id
+		WHERE ec.create_date BETWEEN '2017-06-01' AND '2017-06-30'
+		GROUP BY ecd.project_id, e.expense_type
+	</select>
+
+</mapper>

@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.yesway.pms.core.project.dao.ProjectDaoImpl">
+
+	<sql id="pms_project"> pms_project </sql>
+
+	<sql id="update_sql">
+		<set>
+			<if test="code != null and code != ''">
+				project_code = #{code} ,
+			</if>
+			<if test="name != null and name != ''">
+				project_name = #{name} ,
+			</if>
+			<if test="aliasName != null and aliasName != ''">
+				alias_name = #{aliasName} ,
+			</if>
+			<if test="planStartTime != null">
+				plan_start_time = #{planStartTime} ,
+			</if>
+			<if test="planEndTime != null">
+				plan_end_time = #{planEndTime} ,
+			</if>
+			<if test="actualStartTime != null">
+				actual_start_time = #{actualStartTime} ,
+			</if>
+			<if test="actualEndTime != null">
+				actual_end_time = #{actualEndTime} ,
+			</if>
+			<if test="status != null">
+				project_status = #{status.value} ,
+			</if>
+			<if test="budget != null">
+				budget = #{budget} ,
+			</if>
+			<if test="description != null and description != ''">
+				description = #{description} ,
+			</if>
+			<if test="deleted != null">
+				is_deleted = #{deleted} ,
+			</if>
+			<if test="gmtCreate != null">
+				gmt_create = #{gmtCreate} ,
+			</if>
+			<if test="gmtModified != null">
+				gmt_modified = #{gmtModified}
+			</if>
+		</set>
+	</sql>
+
+	<sql id="condition_sql">
+		<if test="id != null">
+			AND id = #{id}
+		</if>
+		<if test="code != null and code !=''">
+			AND project_code like CONCAT('%',#{code},'%')
+		</if>
+		<if test="name != null and name !=''">
+			AND project_name like CONCAT('%',#{name},'%')
+		</if>
+		<if test="aliasName != null and aliasName !=''">
+			AND alias_name like CONCAT('%',#{aliasName},'%')
+		</if>
+	</sql>
+
+	<resultMap id="beanMap" type="Project">
+		<result property="id" column="id" />
+		<result property="code" column="project_code" />
+		<result property="name" column="project_name" />
+		<result property="aliasName" column="alias_name" />
+		<result property="planStartTime" column="plan_start_time" />
+		<result property="planEndTime" column="plan_end_time" />
+		<result property="actualStartTime" column="actual_start_time" />
+		<result property="actualEndTime" column="actual_end_time" />
+		<result property="status" column="project_status"
+			typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler" javaType="cn.yesway.pms.common.enums.ProjectStatus" />
+		<result property="budget" column="budget" />
+		<result property="description" column="description" />
+		<result property="deleted" column="is_deleted" />
+		<result property="gmtCreate" column="gmt_create" />
+		<result property="gmtModified" column="gmt_modified" />
+	</resultMap>
+
+	<insert id="insert" parameterType="Project" keyProperty="id"
+		useGeneratedKeys="true">
+		INSERT INTO
+		<include refid="pms_project" />
+		(
+		id,
+		project_code,
+		project_name,
+		alias_name,
+		plan_start_time,
+		plan_end_time,
+		actual_start_time,
+		actual_end_time,
+		project_status,
+		budget,
+		description,
+		is_deleted,
+		gmt_create,
+		gmt_modified
+		)
+		VALUES
+		(
+		#{id},
+		#{code},
+		#{name},
+		#{aliasName},
+		#{planStartTime},
+		#{planEndTime},
+		#{actualStartTime},
+		#{actualEndTime},
+		#{status.value},
+		#{budget},
+		#{description},
+		#{deleted},
+		#{gmtCreate},
+		#{gmtModified}
+		)
+	</insert>
+
+	<update id="update" parameterType="Project">
+		update
+		<include refid="pms_project" />
+		<include refid="update_sql" />
+		<where>
+			id = #{id}
+		</where>
+	</update>
+
+	<select id="findById" parameterType="Long" resultMap="beanMap">
+		SELECT
+		id,
+		project_code,
+		project_name,
+		alias_name,
+		plan_start_time,
+		plan_end_time,
+		actual_start_time,
+		actual_end_time,
+		project_status,
+		budget,
+		description
+		FROM
+		<include refid="pms_project" />
+		<where>
+			id = #{id}
+		</where>
+	</select>
+
+	<select id="countByParam" parameterType="java.util.Map"
+		resultType="Long">
+		SELECT
+		COUNT(0)
+		FROM
+		<include refid="pms_project" />
+		<where>
+			<include refid="condition_sql" />
+		</where>
+	</select>
+
+	<select id="listByPageAndParam" parameterType="java.util.Map"
+		resultMap="beanMap">
+		SELECT
+		id,
+		project_code,
+		project_name,
+		alias_name,
+		plan_start_time,
+		plan_end_time,
+		actual_start_time,
+		actual_end_time,
+		project_status,
+		budget
+		FROM
+		<include refid="pms_project" />
+		<where>
+			<include refid="condition_sql" />
+			AND is_deleted = 0
+		</where>
+	</select>
+
+	<update id="deleteByIds" parameterType="Integer[]">
+		UPDATE
+		<include refid="pms_project" />
+		SET
+		is_deleted = 1
+		<where>
+			id
+			<foreach collection="array" item="id" open="in (" close=")"
+				separator=",">
+				#{id}
+			</foreach>
+		</where>
+	</update>
+
+	<select id="listByStatus" resultMap="beanMap">
+		SELECT
+		id,
+		project_name
+		FROM
+		<include refid="pms_project" />
+		<where>
+			is_deleted = 0 AND project_status IN (0, 1, 2)
+		</where>
+	</select>
+
+	<select id="listByRunning" resultMap="beanMap">
+		SELECT
+		id,
+		project_name
+		FROM
+		<include refid="pms_project" />
+		<where>
+			is_deleted = 0 AND project_status = 1
+		</where>
+	</select>
+
+	<select id="listByParam" resultMap="beanMap" parameterType="java.util.Map">
+		SELECT id, alias_name, project_name FROM
+		<include refid="pms_project" />
+		<where>
+			<if test="employeeId != null and employeeId !=''">
+				id IN (
+				SELECT project_id
+				FROM
+				pms_project_permission WHERE employee_id
+				=
+				#{employeeId}
+				) AND
+				is_deleted =
+				0
+			</if>
+		</where>
+	</select>
+
+	<select id="listByEmployeeId" resultMap="beanMap" parameterType="java.util.Map">
+		SELECT
+		id,
+		project_code,
+		project_name,
+		alias_name,
+		project_status,
+		budget
+		FROM
+		<include refid="pms_project" />
+		<where>
+			id IN (
+			SELECT project_id
+			FROM pms_project_permission WHERE employee_id
+			=
+			#{employeeId}
+			) AND
+			is_deleted = 0
+			<include refid="condition_sql" />
+		</where>
+	</select>
+</mapper>

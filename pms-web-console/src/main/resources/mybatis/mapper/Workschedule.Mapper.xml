@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.yesway.pms.core.cast.employee.dao.WorkscheduleDaoImpl">
+
+	<sql id="pms_workschedule"> pms_workschedule </sql>
+	<sql id="pms_workschedule_detail"> pms_workschedule_detail </sql>
+	<resultMap id="beanMap" type="Workschedule">
+		<id column="id" property="id" />
+		<result column="employee_id" property="employee.id" />
+		<result column="emp_name" property="employee.name" />
+		<result column="create_date" property="createDate" />
+		<result column="total_work_time" property="totalWorkTime" />
+		<result column="approval_status" property="status"
+			typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler" javaType="cn.yesway.pms.common.enums.ApprovalStatus" />
+		<collection property="details" ofType="WorkscheduleDetail"
+			column="id" select="findDetailById">
+		</collection>
+	</resultMap>
+	<resultMap id="detailBeanMap" type="WorkscheduleDetail">
+		<id column="id" property="id" />
+		<result column="project_id" property="projectId" />
+		<result column="project_name" property="projectName" />
+		<result column="work_time" property="workTime" />
+		<result column="description" property="description" />
+	</resultMap>
+	<insert id="insert" parameterType="Workschedule" keyProperty="id"
+		useGeneratedKeys="true">
+		insert into
+		<include refid="pms_workschedule" />
+		(employee_id, create_date, approval_status, total_work_time) values
+		(#{employee.id},
+		#{createDate}, #{status.value}, #{totalWorkTime})
+	</insert>
+	<insert id="insertDetail" parameterType="Workschedule">
+		insert into
+		<include refid="pms_workschedule_detail" />
+		(workschedule_id, project_id, work_time, description, is_confirm)
+		values
+		<foreach collection="details" item="detail" separator=","
+			close=";">
+			(#{id}, #{detail.projectId}, #{detail.workTime},
+			#{detail.description}, 0)
+		</foreach>
+	</insert>
+	<select id="listByPageAndParam" parameterType="java.util.Map"
+		resultMap="beanMap">
+		select id, create_date, approval_status, total_work_time
+		from
+		<include refid="pms_workschedule" />
+		<where>
+			<if test="createDate != null and createDate != ''">
+				and create_date = #{createDate}
+			</if>
+			<if test="status != null and status != ''">
+				and approval_status = #{status}
+			</if>
+			and employee_id = #{employeeId}
+		</where>
+        <![CDATA[
+        order by create_date desc
+        ]]>
+	</select>
+	<select id="listByParam" parameterType="java.util.Map"
+		resultMap="beanMap">
+		select id, create_date, approval_status, total_work_time
+		from
+		<include refid="pms_workschedule" />
+		<where>
+			<if test="year != null and year != '' and month != null and month != ''">
+				and YEAR(create_date) = #{year} and MONTH(create_date) =
+				#{month}
+			</if>
+			<if test="status != null and status != ''">
+				and approval_status = #{status}
+			</if>
+			and employee_id = #{employeeId}
+		</where>
+        <![CDATA[
+        order by create_date desc
+        ]]>
+	</select>
+	<select id="findById" parameterType="Long" resultMap="beanMap">
+		SELECT
+		ws.id, ws.employee_id, emp.emp_name,
+		ws.create_date FROM
+		pms_workschedule ws INNER JOIN pms_employee emp ON
+		ws.employee_id =
+		emp.id where ws.id = #{id}
+	</select>
+	<select id="findDetailById" parameterType="Long" resultMap="detailBeanMap">
+		SELECT wsd.id, wsd.project_id, p.project_name, wsd.work_time,
+		wsd.description
+		FROM
+		<include refid="pms_workschedule_detail" />
+		wsd INNER JOIN pms_project
+		p ON
+		wsd.project_id = p.id
+		<where>wsd.workschedule_id = #{id}
+		</where>
+	</select>
+	<update id="update" parameterType="Workschedule">
+		update
+		<include refid="pms_workschedule" />
+		set total_work_time = #{totalWorkTime} where id = #{id};
+		delete from
+		<include refid="pms_workschedule_detail" />
+		WHERE workschedule_id = #{id};
+		insert into
+		<include refid="pms_workschedule_detail" />
+		(workschedule_id, project_id, work_time, description) values
+		<foreach collection="details" item="detail" separator=","
+			close=";">
+			(#{id}, #{detail.projectId}, #{detail.workTime},
+			#{detail.description})
+		</foreach>
+	</update>
+	<update id="updateStatus" parameterType="Workschedule">
+		update
+		<include refid="pms_workschedule" />
+		set approval_status = #{status.value}
+		<where>
+			id = #{id}
+		</where>
+	</update>
+	<select id="countByEmployeIdAndCreateDate" parameterType="java.util.Map"
+		resultType="int">
+		select count(0) from
+		<include refid="pms_workschedule" />
+		<where>
+			employee_id = #{employeeId} and create_date = #{createDate}
+		</where>
+	</select>
+	<select id="findByStatus" parameterType="java.util.Map"
+		resultMap="beanMap">
+		SELECT
+		ws.id,
+		ws.employee_id,
+		emp.emp_name,
+		ws.create_date,
+		ws.approval_status,
+		ws.total_work_time
+		FROM
+		<include refid="pms_workschedule" />
+		ws
+		INNER JOIN pms_employee emp
+		ON ws.employee_id = emp.id
+		<where>
+			ws.employee_id IN
+			(SELECT
+			id
+			FROM
+			pms_employee
+			WHERE department_id IN
+			(SELECT
+			id
+			FROM
+			pms_department
+			WHERE id = #{selfDepartmentId}
+			OR pid =
+			#{selfDepartmentId}))
+			<if test="type != 0">
+				AND ws.approval_status &gt; #{status}
+			</if>
+			<if test="type == 0">
+				AND ws.approval_status = #{status}
+			</if>
+			<if
+				test="fromDate != null and fromDate != '' and toDate != null and toDate != ''">
+				AND ws.create_date between #{fromDate} and #{toDate}
+			</if>
+			<if test="subordinate != null and subordinate != ''">
+				AND ws.employee_id = #{subordinate}
+			</if>
+			<if test="departmentId != null and departmentId != ''">
+				AND emp.department_id = #{departmentId}
+			</if>
+		</where>
+        <![CDATA[
+        order by ws.create_date desc
+        ]]>
+	</select>
+
+</mapper>

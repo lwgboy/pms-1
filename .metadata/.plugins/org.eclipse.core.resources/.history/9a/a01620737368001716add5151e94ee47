@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.yesway.pms.core.cast.resource.dao.ResourceCastReportDaoImpl">
+
+
+	<resultMap id="beanMap" type="ResourceCastReport">
+		<id column="id" property="id" />
+		<result column="affiliation_date" property="affiliationDate" />
+		<result column="pre_tax_cast" property="preTaxCast" />
+		<result column="tas_money" property="tasMoney" />
+		<result column="after_tax_cast" property="afterTaxCast" />
+		<result column="approval_status" property="status"
+			typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler" javaType="cn.yesway.pms.common.enums.ApprovalStatus" />
+		<result column="description" property="description" />
+	</resultMap>
+
+	<resultMap id="beanMapForDetail" type="ResourceCast">
+		<id column="id" property="id" />
+		<result column="affiliation_date" property="affiliationDate" />
+		<result column="pre_tax_cast" property="preTaxCast" />
+		<result column="tas_money" property="tasMoney" />
+		<result column="after_tax_cast" property="afterTaxCast" />
+		<result column="approval_status" property="status"
+			typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler" javaType="cn.yesway.pms.common.enums.ApprovalStatus" />
+		<result column="description" property="description" />
+		<collection property="details" ofType="ResourceCastDetail"
+			column="id" select="findDetailsById">
+		</collection>
+	</resultMap>
+
+	<resultMap id="detailMap" type="ResourceCastDetail">
+		<id column="id" property="id" />
+		<result column="resource_id" property="resource.id" />
+		<result column="resource_name" property="resource.name" />
+		<result column="charge_mode" property="resource.chargeMode" />
+		<result column="charge_code" property="resource.chargeCode" />
+		<result column="operators" property="resource.operators" />
+		<result column="pre_tax_cast" property="preTaxCast" />
+		<result column="tas_money" property="tasMoney" />
+		<result column="after_tax_cast" property="afterTaxCast" />
+		<result column="description" property="description" />
+	</resultMap>
+
+	<insert id="insert" parameterType="ResourceCast" keyProperty="id"
+		useGeneratedKeys="true">
+		insert into
+		<include refid="pms_resource_cast" />
+		(pre_tax_cast, tas_money, after_tax_cast,
+		affiliation_date,
+		approval_status, description) values
+		(#{preTaxCast}, #{tasMoney},
+		#{afterTaxCast},
+		#{affiliationDate},
+		#{status.value}, #{description})
+	</insert>
+
+	<delete id="deleteDetailById" parameterType="Long">
+		DELETE FROM pms_resource_cast_detail
+		<where>
+			resource_cast_id = #{id}
+		</where>
+	</delete>
+
+	<insert id="createDetails" parameterType="ResourceCast">
+		insert into pms_resource_cast_detail
+		(resource_cast_id, resource_id,
+		pre_tax_cast, tas_money,
+		after_tax_cast, description) values
+		<foreach collection="details" item="detail" separator=","
+			close=";">
+			(#{id}, #{detail.resource.id},
+			#{detail.preTaxCast},
+			#{detail.tasMoney},
+			#{detail.afterTaxCast},
+			#{detail.description})
+		</foreach>
+	</insert>
+
+	<update id="update" parameterType="ResourceCast">
+		update
+		<include refid="pms_resource_cast" />
+		<include refid="update_sql" />
+		<where>id = #{id}</where>
+	</update>
+
+	<select id="findById" parameterType="Long" resultMap="beanMapForDetail">
+		SELECT
+		id,
+		affiliation_date,
+		pre_tax_cast,
+		tas_money,
+		after_tax_cast,
+		description,
+		approval_status
+		FROM
+		pms_resource_cast
+		<where>
+			id = #{id}
+		</where>
+	</select>
+
+	<select id="findDetailsById" parameterType="Long" resultMap="detailMap">
+		SELECT
+		rcd.id,
+		rcd.resource_cast_id,
+		r.id AS resource_id,
+		r.resource_name,
+		r.charge_mode,
+		r.charge_code,
+		r.operators,
+		rcd.pre_tax_cast,
+		rcd.tas_money,
+		rcd.after_tax_cast,
+		rcd.description
+		FROM
+		pms_resource_cast_detail rcd
+		INNER JOIN pms_resource r
+		ON
+		rcd.resource_id = r.id
+		<where>
+			rcd.resource_cast_id = #{id}
+		</where>
+	</select>
+
+	<select id="listByPageAndParam" parameterType="java.util.Map"
+		resultMap="beanMap">
+		SELECT
+		id,
+		affiliation_date,
+		pre_tax_cast,
+		tas_money,
+		after_tax_cast,
+		description,
+		approval_status
+		FROM
+		pms_resource_cast
+		<where>
+			<if
+				test="fromDate != null and fromDate != '' and toDate != null and toDate != ''">
+				affiliation_date between #{fromDate} and #{toDate}
+			</if>
+		</where>
+		<![CDATA[
+        order by affiliation_date desc
+        ]]>
+	</select>
+
+	<select id="reviewListByPageAndParam" parameterType="java.util.Map"
+		resultMap="beanMap">
+		select
+		rc.affiliation_date, rc.pre_tax_cast, rc.tas_money,
+		rc.after_tax_cast
+		from
+		pms_resource_cast rc
+		inner join
+		pms_resource_amount ra
+		on rc.affiliation_date = ra.affiliation_date
+		where rc.approval_status = 1 and ra.approval_status = 1
+		order by rc.affiliation_date desc
+	</select>
+
+	<select id="countByParam" parameterType="java.util.Map"
+		resultType="Long">
+		select count(0) from
+		<include refid="pms_resource_cast" />
+		<where>
+			MONTH(affiliation_date) = #{month}
+			and YEAR(affiliation_date) =
+			#{year}
+		</where>
+	</select>
+
+	<insert id="createReport" parameterType="Long">
+		insert into
+		pms_resource_cast_report (
+		resource_code,
+		project_code,
+		affiliation_date,
+		pre_tax_cast,
+		tas_money,
+		after_tax_cast
+		)
+		select
+		r.resource_code as resource_code,
+		p.project_code,
+		rc.affiliation_date,
+		rcd.pre_tax_cast,
+		rcd.tas_money,
+		rcd.after_tax_cast
+		from
+		pms_resource_cast_detail rcd
+		inner join pms_resource r
+		on
+		rcd.resource_id = r.id
+		inner join pms_resource_cast rc
+		on
+		rcd.resource_cast_id = rc.id
+		inner JOIN pms_project p
+		ON r.project_id =
+		p.id
+		where r.use_type = 0
+		and rc.id = #{id}
+	</insert>
+
+</mapper>

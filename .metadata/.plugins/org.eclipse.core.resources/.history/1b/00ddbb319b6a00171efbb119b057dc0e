@@ -1,0 +1,5 @@
+package cn.yesway.pms.core.report.entity;
+
+public class ProjectCastReport extends BaseEntity {
+
+}

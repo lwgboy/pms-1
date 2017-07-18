@@ -1,0 +1,57 @@
+package cn.yesway.pms.web.console.controller;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import cn.yesway.pms.common.web.entity.WebAppResult;
+import cn.yesway.pms.common.web.entity.WebConstant;
+import cn.yesway.pms.common.web.enums.ResultStatus;
+import cn.yesway.pms.core.employee.biz.EmployeeBiz;
+import cn.yesway.pms.core.employee.entity.Employee;
+import cn.yesway.pms.core.report.biz.WorkscheduleReportBiz;
+
+@RestController
+@RequestMapping("/report/workschedule")
+public class WorkscheduleReportController {
+
+	@Autowired
+	private EmployeeBiz employeeBiz;
+	@Autowired
+	private WorkscheduleReportBiz workscheduleReportBiz;
+
+	@RequestMapping(value = "/employee", method = RequestMethod.POST)
+	public WebAppResult employeeReport(@RequestBody Map<String, Object> map, HttpSession httpSession) {
+		Employee employee = (Employee) httpSession.getAttribute(WebConstant.SESSION_NAME);
+		map.put("employeeIds", new Long[] { employee.getId() });
+		WebAppResult result = new WebAppResult(ResultStatus.SUCCESS, "", workscheduleReportBiz.listProjectWorkscheduleReportByParam(map));
+		return result;
+	}
+
+	@RequestMapping(value = "/employees", method = RequestMethod.POST)
+	public WebAppResult departmentReport(@RequestBody Map<String, Object> map, HttpSession httpSession) {
+		Employee employee = (Employee) httpSession.getAttribute(WebConstant.SESSION_NAME);
+		List<Employee> myDeptEmployees = employeeBiz.listByDeptId(employee.getDepartment().getId());
+		Object[] ids = myDeptEmployees.stream().map(Employee::getId).collect(Collectors.toList()).toArray();
+		map.put("employeeIds", ids);
+		WebAppResult result = new WebAppResult(ResultStatus.SUCCESS, "", workscheduleReportBiz.listProjectWorkscheduleReportByParam(map));
+		return result;
+	}
+
+	@RequestMapping(value = "/employee/detail", method = RequestMethod.POST)
+	public WebAppResult reportDetail(@RequestBody Map<String, Object> map, HttpSession httpSession) {
+		Employee employee = (Employee) httpSession.getAttribute(WebConstant.SESSION_NAME);
+		map.put("employeeIds", new Long[] { employee.getId() });
+		WebAppResult result = new WebAppResult(ResultStatus.SUCCESS, "", workscheduleReportBiz.listDetailByParam(map));
+		return result;
+	}
+
+}

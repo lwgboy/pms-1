@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.yesway.pms.core.cast.expense.dao.ExpenseDaoImpl">
+
+	<sql id="table"> pms_expense </sql>
+
+	<sql id="update_sql">
+		<set>
+			<if test="name != null and name != ''">
+				expense_name = #{name},
+			</if>
+			<if test="description != null and description != ''">
+				description = #{description},
+			</if>
+			<if test="deleted != null and deleted != ''">
+				is_deleted = #{deleted},
+			</if>
+		</set>
+	</sql>
+
+	<sql id="condition_sql">
+		<if test="id != null">
+			AND id = #{id}
+		</if>
+		<if test="code != null and code !=''">
+			AND expense_code like CONCAT('%',#{code},'%')
+		</if>
+		<if test="name != null and name !=''">
+			AND expense_name like CONCAT('%',#{name},'%')
+		</if>
+		<if test="type != null and type != ''">
+			AND expense_type = #{type}
+		</if>
+		<if test="description != null and description !=''">
+			AND description = #{description}
+		</if>
+		<if test="deleted != null">
+			AND is_deleted = #{deleted}
+		</if>
+	</sql>
+
+	<resultMap id="beanMap" type="Expense">
+		<result property="id" column="id" />
+		<result property="code" column="expense_code" />
+		<result property="name" column="expense_name" />
+		<result property="type" column="expense_type"
+			typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler" javaType="cn.yesway.pms.common.enums.ExpenseType" />
+		<result property="description" column="description" />
+		<result property="deleted" column="is_deleted" />
+	</resultMap>
+
+	<insert id="insert" parameterType="Expense" keyProperty="id"
+		useGeneratedKeys="true">
+		INSERT INTO
+		<include refid="table" />
+		(
+		id ,
+		expense_code,
+		expense_name,
+		expense_type,
+		description,
+		is_deleted,
+		gmt_create,
+		gmt_modified
+		) VALUES (
+		#{id} ,
+		#{code} ,
+		#{name} ,
+		#{type.value} ,
+		#{description} ,
+		#{deleted} ,
+		#{gmtCreate} ,
+		#{gmtModified}
+		)
+	</insert>
+
+	<update id="update" parameterType="Expense">
+		update
+		<include refid="table" />
+		<include refid="update_sql" />
+		<where>
+			id = #{id}
+		</where>
+	</update>
+
+	<select id="findById" parameterType="Long" resultMap="beanMap">
+		select
+		id,expense_code,expense_name,expense_type,description,is_deleted
+		from
+		<include refid="table" />
+		<where>
+			id = #{id}
+		</where>
+	</select>
+
+	<select id="countByParam" parameterType="java.util.Map"
+		resultType="Long">
+		select count(0) from
+		<include refid="table" />
+		<where>
+			<include refid="condition_sql" />
+		</where>
+	</select>
+
+	<select id="listByParam" parameterType="java.util.Map"
+		resultMap="beanMap">
+		select id, expense_name from
+		<include refid="table" />
+		<where>
+			<include refid="condition_sql" />
+		</where>
+	</select>
+
+	<select id="listByPageAndParam" parameterType="java.util.Map"
+		resultMap="beanMap">
+		select
+		id,expense_code,expense_name,expense_type,description,is_deleted
+		from
+		<include refid="table" />
+		<where>
+			<include refid="condition_sql" />
+		</where>
+	</select>
+
+	<update id="deleteByIds" parameterType="Integer[]">
+		update
+		<include refid="table" />
+		set is_deleted = 1
+		<where>
+			id
+			<foreach collection="array" item="id" open="in (" close=")"
+				separator=",">
+				#{id}
+			</foreach>
+		</where>
+	</update>
+
+</mapper>

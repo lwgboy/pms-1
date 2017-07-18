@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.yesway.pms.core.cast.resource.dao.ResourceDaoImpl">
+
+	<sql id="pms_resource"> pms_resource </sql>
+
+	<sql id="update_sql">
+		<set>
+			<if test="code != null and code != ''">resource_code = #{code},</if>
+			<if test="name != null and name != ''">resource_name = #{name},</if>
+			<if test="dependency != null and dependency != ''">dependency = #{dependency},</if>
+			<if test="operators != null and operators != ''">operators = #{operators},</if>
+			<if test="type != null and type != ''">resource_type = #{type},</if>
+			<if test="subType != null and subType != ''">resource_sub_type = #{subType},</if>
+			<if test="useType != null and useType != ''">use_type = #{useType},</if>
+			<if test="chargeType != null and chargeType != ''">charge_type = #{chargeType},</if>
+			<if test="chargeStandards != null and chargeStandards != ''">charge_standards = #{chargeStandards},</if>
+			<if test="chargeFrequency != null and chargeFrequency != ''">charge_frequency = #{chargeFrequency},</if>
+			<if test="chargeMode != null and chargeMode != ''">charge_mode = #{chargeMode},</if>
+			<if test="chargeCode != null and chargeCode != ''">charge_code = #{chargeCode},</if>
+			<if test="paySubject != null and paySubject != ''">pay_subject = #{paySubject},</if>
+			<if test="accountingType != null and accountingType != ''">accounting_type = #{accountingType},</if>
+			<if test="accountingRemark != null and accountingRemark != ''">accounting_remark = #{accountingRemark},</if>
+			<if test="unit != null and unit != ''">unit = #{unit},</if>
+			<if test="description != null and description != ''">description = #{description},</if>
+			<if test="project != null and project.id != null and project.id != ''">project_id = #{project.id},</if>
+		</set>
+	</sql>
+
+	<sql id="condition_sql">
+		<if test="code != null and code != ''"> and resource_code like CONCAT('%',#{code},'%') </if>
+		<if test="dependency != null and dependency != ''"> and dependency like CONCAT('%',#{dependency},'%') </if>
+		<if test="operators != null and operators != ''"> and operators like CONCAT('%',#{operators},'%') </if>
+		<if test="name != null and name != ''"> and resource_name like CONCAT('%',#{name},'%') </if>
+		<if test="type != null and type != ''"> and resource_type = #{type} </if>
+		<if test="subType != null and subType != ''"> and resource_sub_type = #{subType} </if>
+		<if test="useType != null and useType != ''"> and use_type = #{useType} </if>
+		<if test="chargeType != null and chargeType != ''"> and charge_type = #{chargeType} </if>
+		<if test="chargeMode != null and chargeMode != ''"> and charge_mode = #{chargeMode} </if>
+		<if test="paySubject != null and paySubject != ''"> and pay_subject = #{paySubject} </if>
+		<if test="accountingType != null and accountingType != ''"> and accounting_type = #{accountingType} </if>
+		<if test="unit != null and unit != ''"> and unit = #{unit} </if>
+		and is_deleted = 0
+	</sql>
+
+	<resultMap id="beanMap" type="Resource">
+		<id column="id" property="id" />
+		<result column="resource_code" property="code" />
+		<result column="dependency" property="dependency" />
+		<result column="operators" property="operators" />
+		<result column="resource_type" property="type" />
+		<result column="resource_sub_type" property="subType" />
+		<result column="resource_name" property="name" />
+		<result column="use_type" property="useType" />
+		<result column="charge_type" property="chargeType" />
+		<result column="charge_standards" property="chargeStandards" />
+		<result column="charge_frequency" property="chargeFrequency" />
+		<result column="charge_mode" property="chargeMode" />
+		<result column="charge_code" property="chargeCode" />
+		<result column="pay_subject" property="paySubject" />
+		<result column="accounting_type" property="accountingType" />
+		<result column="accounting_remark" property="accountingRemark" />
+		<result column="unit" property="unit" />
+		<result column="description" property="description" />
+		<result column="project_id" property="project.id" />
+		<result column="project_name" property="project.name" />
+	</resultMap>
+
+	<insert id="insert" parameterType="Resource" keyProperty="id"
+		useGeneratedKeys="true">
+		insert into
+		<include refid="pms_resource" />
+		(resource_code, dependency, operators, resource_type,
+		resource_sub_type, resource_name, use_type, charge_type,
+		charge_standards, charge_frequency, charge_mode, charge_code, pay_subject,
+		accounting_type, accounting_remark, unit, description, is_deleted,
+		gmt_create, gmt_modified, project_id) values
+		(#{code}, #{dependency},
+		#{operators},
+		#{type}, #{subType},
+		#{name}, #{useType}, #{chargeType},
+		#{chargeStandards}, #{chargeFrequency},
+		#{chargeMode}, #{chargeCode}, #{paySubject},
+		#{accountingType}, #{accountingRemark},
+		#{unit},
+		#{description},
+		#{deleted}, #{gmtCreate}, #{gmtModified}, #{project.id})
+	</insert>
+
+	<update id="update" parameterType="Resource">
+		update
+		<include refid="pms_resource" />
+		<include refid="update_sql" />
+		<where>id = #{id}</where>
+	</update>
+
+	<update id="deleteById" parameterType="Long[]">
+		update
+		<include refid="pms_resource" />
+		set is_deleted = 1
+		<where>
+			id
+			<foreach collection="array" item="id" open="in (" close=")"
+				separator=",">
+				#{id}
+			</foreach>
+		</where>
+	</update>
+
+	<select id="findById" parameterType="Long" resultMap="beanMap">
+		select id, resource_code, dependency, operators, resource_type,
+		resource_sub_type, resource_name, use_type, charge_type,
+		charge_standards, charge_frequency, charge_mode, charge_code, pay_subject,
+		accounting_type, accounting_remark, unit, description, project_id from
+		<include refid="pms_resource" />
+		where id = #{id} and is_deleted = 0
+	</select>
+
+	<select id="listByPageAndParam" parameterType="java.util.Map"
+		resultMap="beanMap">
+		select id, resource_code, dependency, operators, resource_type,
+		resource_sub_type, resource_name, use_type, charge_type,
+		charge_standards, charge_frequency, charge_mode, charge_code, pay_subject,
+		accounting_type, accounting_remark, unit, description, project_id from
+		<include refid="pms_resource" />
+		<where>
+			<include refid="condition_sql" />
+		</where>
+	</select>
+
+	<select id="listByParam" parameterType="java.util.Map"
+		resultMap="beanMap">
+		select id, resource_name, charge_mode, charge_code, operators from
+		<include refid="pms_resource" />
+		<where>
+			<include refid="condition_sql" />
+		</where>
+	</select>
+
+	<select id="countByParam" parameterType="java.util.Map"
+		resultType="Long">
+		select count(0) from
+		<include refid="pms_resource" />
+		<where>
+			resource_code = #{code}
+		</where>
+	</select>
+
+</mapper>

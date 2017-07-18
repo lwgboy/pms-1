@@ -1,0 +1,8 @@
+package cn.yesway.pms.core.cast.resource.dao;
+
+import cn.yesway.pms.common.core.dao.BaseDaoImpl;
+import cn.yesway.pms.core.cast.resource.entity.ResourceCastReport;
+
+public class ResourceCastReportDaoImpl extends BaseDaoImpl<ResourceCastReport> implements ResourceCastReportDao {
+
+}

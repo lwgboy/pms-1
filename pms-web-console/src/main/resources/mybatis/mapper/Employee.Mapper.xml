@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.yesway.pms.core.employee.dao.EmployeeDaoImpl">
+
+	<sql id="table"> pms_employee </sql>
+	<sql id="update_sql">
+		<set>
+			<if test="company.id != null and company.id != ''">
+				company_id = #{company.id},
+			</if>
+			<if test="department.id != null and department.id != ''">
+				department_id = #{department.id},
+			</if>
+			<if test="duty != null">
+				duty = #{duty.value},
+			</if>
+			<if test="manager != null">
+				is_manager = #{manager},
+			</if>
+			<if test="code != null and code != ''">
+				emp_code = #{code},
+			</if>
+			<if test="name != null and name != ''">
+				emp_name = #{name},
+			</if>
+			<if test="loginName != null and loginName != ''">
+				login_name = #{loginName},
+			</if>
+			<if test="gender != null">
+				gender = #{gender.value},
+			</if>
+			<if test="email != null and email != ''">
+				email = #{email},
+			</if>
+			<if test="phone != null and phone != ''">
+				phone = #{phone},
+			</if>
+			<if test="description != null and description != ''">
+				description = #{description},
+			</if>
+			<if test="gmtModified != null">
+				gmt_modified = #{gmtModified}
+			</if>
+		</set>
+	</sql>
+	<sql id="condition_sql">
+		<!-- 用户列表的查询条件 -->
+		<if test="code != null and code !=''"> and emp_code like CONCAT('%',#{code},'%') </if>
+		<if test="name != null and name !=''"> and emp_name like CONCAT('%',#{name},'%') </if>
+		<if test="loginName != null and loginName !=''"> and login_name like CONCAT('%',#{loginName},'%') </if>
+		<if test="gender != null and gender != ''"> and gender = #{gender} </if>
+		<if test="email != null and email !=''"> and email like CONCAT('%',#{email},'%') </if>
+		<if test="phone != null and phone !=''"> and phone like CONCAT('%',#{phone},'%') </if>
+		<if test="companyId != null and companyId !=''"> and company_id = #{companyId} </if>
+		<if test="departmentId != null and departmentId !=''"> and department_id = #{departmentId} </if>
+		<if test="duty != null and duty != ''"> and duty = #{duty}</if>
+	</sql>
+	<sql id="exists_condition_sql">
+		<!-- 注册时不能重复 -->
+		<if test="code != null and code !=''"> and emp_code = #{code} </if>
+		<if test="loginName != null and loginName !=''"> and login_name = #{loginName} </if>
+		<!-- 删除部门时，不能存在 -->
+		<if test="departmentId != null"> and department_id = #{departmentId} and is_deleted = 0
+		</if>
+	</sql>
+	<sql id="login_condition_sql">
+		<!-- 登录系统时的查询条件 -->
+		login_name = #{loginName} and login_pwd = #{loginPwd} and
+		is_deleted =
+		0
+	</sql>
+	<resultMap id="beanMap" type="Employee">
+		<id column="id" property="id" />
+		<result column="emp_code" property="code" />
+		<result column="emp_name" property="name" />
+		<result column="login_name" property="loginName" />
+		<result column="gender" property="gender"
+			typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler" javaType="cn.yesway.pms.common.enums.Gender" />
+		<result column="email" property="email" />
+		<result column="phone" property="phone" />
+		<result column="description" property="description" />
+		<result column="duty" property="duty"
+			typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler" javaType="cn.yesway.pms.common.enums.Duty" />
+		<association property="company" column="company_id"
+			select="cn.yesway.pms.core.company.dao.CompanyDaoImpl.findById" />
+		<association property="department" column="department_id"
+			select="cn.yesway.pms.core.department.dao.DepartmentDaoImpl.findById" />
+	</resultMap>
+	<resultMap id="beanEasyMap" type="Employee">
+		<id column="id" property="id" />
+		<result column="emp_name" property="name" />
+	</resultMap>
+	<insert id="insert" parameterType="Employee" keyProperty="id"
+		useGeneratedKeys="true">
+		insert into
+		<include refid="table" />
+		(company_id, department_id, duty, emp_code, emp_name,
+		login_name,
+		login_pwd, gender, email, phone,
+		is_deleted, description,
+		gmt_create,
+		gmt_modified)
+		values
+		(#{company.id}, #{department.id},
+		#{duty.value},
+		#{code},
+		#{name}, #{loginName}, #{loginPwd},
+		#{gender.value}, #{email},
+		#{phone},
+		#{deleted},
+		#{description},
+		#{gmtCreate}, #{gmtModified});
+	</insert>
+	<insert id="insertDefaultPermission" parameterType="Employee"
+		keyProperty="id" useGeneratedKeys="true">
+		insert into pms_permission (employee_id, function_id) values
+		<foreach collection="functions" item="function" index="index"
+			separator=",">
+			(#{id}, #{function.id})
+		</foreach>
+	</insert>
+	<update id="update" parameterType="Employee">
+		update
+		<include refid="table" />
+		<include refid="update_sql" />
+		<where>
+			ID = #{id}
+		</where>
+	</update>
+	<update id="deleteByIds" parameterType="Integer[]">
+		update
+		<include refid="table" />
+		set is_deleted = 1
+		<where>
+			id
+			<foreach collection="array" item="id" open="in (" close=")"
+				separator=",">
+				#{id}
+			</foreach>
+		</where>
+	</update>
+	<update id="resumedByIds" parameterType="Integer[]">
+		update
+		<include refid="table" />
+		set is_deleted = 0
+		<where>
+			id
+			<foreach collection="array" item="id" open="in (" close=")"
+				separator=",">
+				#{id}
+			</foreach>
+		</where>
+	</update>
+	<update id="updatePassword" parameterType="Employee">
+		update
+		<include refid="table" />
+		set login_pwd = #{loginPwd}
+		<where>
+			id = #{id}
+		</where>
+	</update>
+	<select id="findById" parameterType="Long" resultMap="beanMap">
+		select id, company_id, department_id, duty, emp_code, emp_name,
+		login_name, gender, email, phone,
+		description
+		from
+		<include refid="table" />
+		<where>
+			id = #{id} and is_deleted = 0
+		</where>
+	</select>
+	<select id="countByParam" parameterType="java.util.Map"
+		resultType="Long">
+		select count(0) from
+		<include refid="table" />
+		<where>
+			<include refid="exists_condition_sql" />
+		</where>
+	</select>
+	<select id="listByPageAndParam" parameterType="java.util.Map"
+		resultMap="beanMap">
+		select id, company_id, department_id, duty, emp_code, emp_name,
+		login_name, gender, email, phone,
+		description
+		from
+		<include refid="table" />
+		<where>
+			<include refid="condition_sql" />
+			and is_deleted = 0
+		</where>
+	</select>
+	<select id="listByParam" parameterType="java.util.Map"
+		resultMap="beanMap">
+		select id, emp_code, emp_name from
+		<include refid="table" />
+		<where>
+			<include refid="condition_sql" />
+			and is_deleted = 0
+		</where>
+	</select>
+	<select id="findByLoginNameAndLoginPwd" parameterType="java.util.Map"
+		resultMap="beanMap">
+		select id, company_id, department_id, duty, emp_code, emp_name,
+		login_name, gender, email, phone from
+		<include refid="table" />
+		<where>
+			<include refid="login_condition_sql" />
+		</where>
+	</select>
+	<select id="findByIdAndLoginPwd" parameterType="java.util.Map"
+		resultType="int">
+		select count(0) from
+		<include refid="table" />
+		<where>
+			id=#{id} and login_pwd = #{loginPwd} and is_deleted = 0
+		</where>
+	</select>
+	<select id="listByDepartmentId" parameterType="Long" resultMap="beanEasyMap">
+		SELECT id, emp_name FROM pms_employee WHERE department_id
+		IN (
+		SELECT id
+		FROM pms_department WHERE id = #{departmentId})
+	</select>
+
+	<!-- 根据员工主键，获得其已授权的功能项 -->
+	<select id="findPermissionById" parameterType="Long" resultType="Long">
+		select function_id from pms_permission where employee_id = #{id}
+	</select>
+	<!-- 根据员工主键，清空其已授权的功能项 -->
+	<delete id="deletePermissionById" parameterType="Long">
+		delete
+		from
+		pms_permission where employee_id = #{employeeId}
+	</delete>
+	<!-- 为员工授权功能项 -->
+	<insert id="insertPermission" parameterType="java.util.Map">
+		insert into pms_permission (employee_id, function_id) values
+		<foreach collection="functionIds" item="functionId" index="index"
+			separator=",">
+			(#{employeeId}, #{functionId})
+		</foreach>
+	</insert>
+
+	<!-- 根据员工主键，获得其已授权的功能项 -->
+	<select id="findProjectManagerByProjectId" parameterType="Long"
+		resultType="Long">
+		select employee_id from pms_project_permission where
+		project_id = #{projectId}
+	</select>
+	<!-- 根据员工主键，清空其已授权的项目 -->
+	<delete id="deleteProjectManagerByProjectId" parameterType="Long">
+		delete
+		from
+		pms_project_permission where project_id = #{projectId}
+	</delete>
+	<!-- 为员工授权项目权限 -->
+	<insert id="insertProjectManager" parameterType="java.util.Map">
+		insert into
+		pms_project_permission (employee_id, project_id) values
+		(#{employeeId}, #{projectId})
+	</insert>
+
+	<!-- 根据员工主键，清空其已授权的审批 -->
+	<delete id="deleteWorkFlowPermissionById" parameterType="java.util.Map">
+		delete
+		from
+		pms_workflow_permission where approver_id = #{approverId} and
+		function_id = #{functionId}
+	</delete>
+	<!-- 为员工授权审批 -->
+	<insert id="insertWorkFlowPermission" parameterType="java.util.Map">
+		insert into pms_workflow_permission (approver_id, employee_id,
+		function_id) values
+		<foreach collection="employeeIds" item="employeeId" index="index"
+			separator=",">
+			(#{approverId},#{employeeId}, #{functionId})
+		</foreach>
+	</insert>
+	<!-- 根据员工主键，获得其已授权的功能项 -->
+	<select id="findWorkFlowPermissionById" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT
+		wfp.employee_id AS id,
+		emp.emp_name AS name
+		FROM
+		pms_workflow_permission wfp
+		INNER JOIN pms_employee emp
+		ON
+		wfp.employee_id = emp.id
+		WHERE wfp.approver_id = #{approverId}
+		AND
+		wfp.function_id = #{functionId}
+	</select>
+</mapper>

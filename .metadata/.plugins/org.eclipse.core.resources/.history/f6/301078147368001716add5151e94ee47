@@ -1,0 +1,5 @@
+package cn.yesway.pms.core.cast.resource.dao;
+
+public interface ResourceCastReportDao {
+
+}

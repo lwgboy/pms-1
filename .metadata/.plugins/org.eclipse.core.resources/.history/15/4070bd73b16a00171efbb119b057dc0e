@@ -1,0 +1,13 @@
+package cn.yesway.pms.core.report.dao;
+
+import java.util.List;
+
+import cn.yesway.pms.common.core.dao.BaseDao;
+import cn.yesway.pms.core.report.entity.ProjectCastReport;
+import cn.yesway.pms.core.report.entity.ProjectWorkTime;
+
+public interface ProjectReportCastDao extends BaseDao<ProjectCastReport> {
+	
+	List<ProjectWorkTime> selectWorkTime(Map<String, Object> map);
+	
+}

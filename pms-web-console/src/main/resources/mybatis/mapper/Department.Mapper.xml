@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.yesway.pms.core.department.dao.DepartmentDaoImpl">
+
+	<sql id="table"> pms_department </sql>
+	<sql id="update_sql">
+		<set>
+			<if test="name != null and name != ''">
+				dept_name = #{name},
+			</if>
+			<if test="description != null and description != ''">
+				description = #{description},
+			</if>
+			<if test="gmtModified != null">
+				gmt_modified = #{gmtModified}
+			</if>
+		</set>
+	</sql>
+	<sql id="condition_sql">
+		<if test="parentId != null"> and pid = #{parentId} </if>
+		<if test="name != null and name !=''"> and dept_name like CONCAT('%',#{name},'%') </if>
+	</sql>
+	<sql id="exists_condition_sql">
+		<if test="parentId != null"> and pid = #{parentId} </if>
+	</sql>
+	<resultMap id="beanMap" type="Department">
+		<id column="id" property="id" />
+		<result column="pid" property="parentId" />
+		<result column="pname" property="parentName" />
+		<result column="dept_name" property="name" />
+		<result column="description" property="description" />
+	</resultMap>
+	<insert id="insert" parameterType="Department" keyProperty="id"
+		useGeneratedKeys="true">
+		insert into
+		<include refid="table" />
+		(id, pid, dept_name,
+		description, is_deleted,
+		gmt_create, gmt_modified)
+		values (#{id},
+		#{parentId}, #{name}, #{description}, 0, #{gmtCreate},
+		#{gmtModified})
+	</insert>
+	<update id="update" parameterType="Department">
+		update
+		<include refid="table" />
+		<include refid="update_sql" />
+		<where>
+			ID = #{id}
+		</where>
+	</update>
+	<update id="deleteByIds" parameterType="Long[]">
+		update
+		<include refid="table" />
+		set is_deleted = 1
+		<where>
+			id
+			<foreach collection="array" item="id" open="in (" close=")"
+				separator=",">
+				#{id}
+			</foreach>
+		</where>
+	</update>
+	<update id="resumedByIds" parameterType="Long[]">
+		update
+		<include refid="table" />
+		set is_deleted = 0
+		<where>
+			id
+			<foreach collection="array" item="id" open="in (" close=")"
+				separator=",">
+				#{id}
+			</foreach>
+		</where>
+	</update>
+	<select id="findById" parameterType="Long" resultMap="beanMap">
+		select id,
+		pid,
+		(select dept_name from pms_department where id = pid) as
+		pname,
+		dept_name,
+		description from
+		<include refid="table" />
+		<where>
+			id = #{id} and is_deleted = 0
+		</where>
+	</select>
+	<select id="listByPageAndParam" parameterType="java.util.Map"
+		resultMap="beanMap">
+		select id,
+		pid,
+		(select dept_name from pms_department where id =
+		#{parentId}) as
+		pname,
+		dept_name,
+		description from
+		<include refid="table" />
+		<where>
+			<include refid="condition_sql" />
+			and is_deleted = 0
+		</where>
+	</select>
+	<select id="listByParam" parameterType="java.util.Map"
+		resultMap="beanMap">
+		select id, pid, dept_name from
+		<include refid="table" />
+		<where>
+			and is_deleted = 0
+		</where>
+	</select>
+	<select id="listById" parameterType="long" resultMap="beanMap">
+		SELECT
+		id,
+		pid,
+		dept_name
+		FROM
+		pms_department
+		WHERE id = #{id}
+		OR pid = #{id}
+		AND is_deleted = 0
+	</select>
+	<select id="countByParam" parameterType="java.util.Map"
+		resultType="Long">
+		select count(0) from
+		<include refid="table" />
+		<where>
+			<include refid="exists_condition_sql" />
+			and is_deleted = 0
+		</where>
+	</select>
+
+</mapper>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="pms-web-console">
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
+        <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
+        <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
+        <dependent-module archiveName="pms-config-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pms-config/pms-config">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pms-common-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pms-common/pms-common">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pms-common-core-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pms-common-core/pms-common-core">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pms-common-web-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pms-common-web/pms-common-web">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pms-service-employee-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pms-service-employee/pms-service-employee">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pms-service-company-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pms-service-company/pms-service-company">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pms-service-function-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pms-service-function/pms-service-function">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pms-service-department-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pms-service-department/pms-service-department">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pms-service-project-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pms-service-project/pms-service-project">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pms-service-cast-expense-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pms-service-cast-expense/pms-service-cast-expense">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pms-service-cast-employee-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pms-service-cast-employee/pms-service-cast-employee">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pms-service-cast-resource-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pms-service-cast-resource/pms-service-cast-resource">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pms-service-report-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pms-service-report/pms-service-report">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pms-service-generator-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pms-service-generator/pms-service-generator">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <property name="context-root" value="pms-web-console"/>
+        <property name="java-output-path" value="/pms-web-console/target/classes"/>
+    </wb-module>
+</project-modules>

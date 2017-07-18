@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.yesway.pms.core.company.dao.CompanyDaoImpl">
+
+	<sql id="table"> pms_company </sql>
+
+	<resultMap id="beanMap" type="Company">
+		<id column="id" property="id" />
+		<result column="company_name" property="name" />
+		<result column="description" property="description" />
+	</resultMap>
+
+	<!-- 根据主键查询公司信息 -->
+	<select id="findById" parameterType="Long" resultMap="beanMap">
+		select id, company_name, description from
+		<include refid="table" />
+		<where>
+			id = #{id} and is_deleted = 0
+		</where>
+	</select>
+
+	<!-- 根据条件查询公司信息 -->
+	<select id="listByParam" parameterType="java.util.Map"
+		resultMap="beanMap">
+        select id, company_name from 
+        <include refid="table" />
+        <where>
+            is_deleted = 0
+        </where>
+	</select>
+	
+</mapper>

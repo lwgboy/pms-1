@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.yesway.pms.core.cast.expense.dao.ExpenseCastDaoImpl">
+
+	<sql id="update_sql">
+		<set>
+			<if test="voucherNumber != null and voucherNumber != ''">
+				voucher_number = #{voucherNumber},
+			</if>
+			<if test="preTaxCast != null and preTaxCast != ''">
+				pre_tax_cast = #{preTaxCast},
+			</if>
+			<if test="tasMoney != null and tasMoney != ''">
+				tas_money = #{tasMoney},
+			</if>
+			<if test="afterTaxCast != null and afterTaxCast != ''">
+				after_tax_cast = #{afterTaxCast},
+			</if>
+			<if test="createDate != null">
+				create_date = #{createDate},
+			</if>
+			<if test="description != null and description != ''">
+				description = #{description},
+			</if>
+			<if test="status != null">
+				approval_status = #{status.value},
+			</if>
+			<if test="type != null">
+				cast_type = #{type.value},
+			</if>
+		</set>
+	</sql>
+
+	<sql id="condition_sql">
+		<if test="id != null and id != ''">
+			AND id = #{id}
+		</if>
+		<if
+			test="fromDate != null and fromDate != '' and toDate != null and toDate != ''">
+			AND create_date BETWEEN #{fromDate} AND #{toDate}
+		</if>
+		<if test="type != null and type != ''">
+			AND cast_type = #{type}
+		</if>
+		<if test="status != null and status != ''">
+			AND approval_status &gt;= #{status}
+		</if>
+		<if test="employeeId != null and employeeId != ''">
+            AND employee_id = #{employeeId}
+        </if>
+	</sql>
+
+	<resultMap id="beanMap" type="ExpenseCast">
+		<result property="id" column="id" />
+		<result property="code" column="cast_code" />
+		<result property="type" column="cast_type"
+			typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler" javaType="cn.yesway.pms.common.enums.ExpenseType" />
+		<result property="voucherNumber" column="voucher_number" />
+		<result property="company.id" column="company_id" />
+		<result property="company.name" column="company_name" />
+		<result property="employee.id" column="employee_id" />
+		<result property="employee.name" column="employee_name" />
+		<result property="preTaxCast" column="pre_tax_cast" />
+		<result property="tasMoney" column="tas_money" />
+		<result property="afterTaxCast" column="after_tax_cast" />
+		<result property="createDate" column="create_date" />
+		<result property="status" column="approval_status"
+			typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler" javaType="cn.yesway.pms.common.enums.ApprovalStatus" />
+		<result property="description" column="description" />
+		<result property="deleted" column="is_deleted" />
+	</resultMap>
+
+	<resultMap id="beanMapForDetail" type="ExpenseCast">
+		<result property="id" column="id" />
+		<result property="code" column="cast_code" />
+		<result property="type" column="cast_type"
+			typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler" javaType="cn.yesway.pms.common.enums.ExpenseType" />
+		<result property="voucherNumber" column="voucher_number" />
+		<result property="company.id" column="company_id" />
+		<result property="company.name" column="company_name" />
+		<result property="employee.id" column="employee_id" />
+		<result property="employee.name" column="employee_name" />
+		<result property="preTaxCast" column="pre_tax_cast" />
+		<result property="tasMoney" column="tas_money" />
+		<result property="afterTaxCast" column="after_tax_cast" />
+		<result property="createDate" column="create_date" />
+		<result property="status" column="approval_status"
+			typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler" javaType="cn.yesway.pms.common.enums.ApprovalStatus" />
+		<result property="description" column="description" />
+		<result property="deleted" column="is_deleted" />
+		<collection property="details" ofType="ExpenseCastDetail"
+			column="id" select="findDetailsById">
+		</collection>
+	</resultMap>
+
+	<resultMap id="detailMap" type="ExpenseCastDetail">
+		<result property="id" column="id" />
+		<result property="expenseCastId" column="expense_cast_id" />
+		<result property="expense.id" column="expense_id" />
+		<result property="expense.name" column="expense_name" />
+		<result property="project.id" column="project_id" />
+		<result property="project.name" column="project_name" />
+		<result property="department.id" column="department_id" />
+		<result property="department.name" column="department_name" />
+		<result property="preTaxCast" column="pre_tax_cast" />
+		<result property="tasMoney" column="tas_money" />
+		<result property="afterTaxCast" column="after_tax_cast" />
+		<result property="description" column="description" />
+	</resultMap>
+
+	<resultMap id="reportMap" type="ExpenseCastReportData">
+		<result property="expense.id" column="expense_id" />
+		<result property="expense.name" column="expense_name" />
+		<result property="project.id" column="project_id" />
+		<result property="project.name" column="project_name" />
+		<result property="department.id" column="department_id" />
+		<result property="department.name" column="department_name" />
+		<result property="cast" column="pre_tax_cast" />
+	</resultMap>
+
+	<insert id="insert" parameterType="ExpenseCast" keyProperty="id"
+		useGeneratedKeys="true">
+		INSERT INTO
+		pms_expense_cast
+		(id
+		,cast_code,cast_type,voucher_number,pay_subject,pre_tax_cast,tas_money,
+		after_tax_cast,create_date,description,approval_status,employee_id)
+		VALUES
+		(#{id},#{code},#{type.value},#{voucherNumber},#{company.id},#{preTaxCast},
+		#{tasMoney},#{afterTaxCast},#{createDate},#{description},
+		#{status.value},#{employee.id})
+	</insert>
+
+	<delete id="deleteDetailById" parameterType="Long">
+		DELETE FROM pms_expense_cast_detail
+		<where>
+			expense_cast_id = #{id}
+		</where>
+	</delete>
+
+	<insert id="insertDetail" parameterType="ExpenseCast">
+		INSERT INTO pms_expense_cast_detail
+		(expense_cast_id,
+		project_id,
+		expense_id, department_id,
+		pre_tax_cast, tas_money,
+		after_tax_cast,
+		description) values
+		<foreach collection="details" item="detail" separator=","
+			close=";">
+			(#{id}, #{detail.project.id}, #{detail.expense.id},
+			#{detail.department.id},
+			#{detail.preTaxCast}, #{detail.tasMoney},
+			#{detail.afterTaxCast}, #{detail.description})
+		</foreach>
+	</insert>
+
+	<update id="update" parameterType="ExpenseCast">
+		update
+		pms_expense_cast
+		<include refid="update_sql" />
+		<where>
+			id = #{id}
+		</where>
+	</update>
+
+	<select id="findById" parameterType="Long" resultMap="beanMapForDetail">
+		SELECT oec.id, oec.cast_code, oec.cast_type, oec.voucher_number,
+		c.id
+		AS company_id,
+		c.company_name,
+		e.id AS employee_id, e.emp_name AS
+		employee_name,
+		oec.pre_tax_cast, oec.tas_money, oec.after_tax_cast,
+		oec.create_date,
+		oec.description, oec.approval_status
+		FROM
+		pms_expense_cast
+		oec INNER
+		JOIN pms_company c ON
+		oec.pay_subject = c.id
+		INNER JOIN
+		pms_employee e ON
+		oec.employee_id = e.id
+		<where>
+			oec.id = #{id}
+		</where>
+	</select>
+
+	<select id="findDetailsById" parameterType="Long" resultMap="detailMap">
+		SELECT oecd.id, oecd.expense_cast_id, e.id AS expense_id,
+		e.expense_name,
+		p.id AS project_id, p.project_name,
+		d.id AS
+		department_id, d.dept_name AS department_name,
+		oecd.pre_tax_cast,
+		oecd.tas_money, oecd.after_tax_cast,
+		oecd.description
+		FROM
+		pms_expense_cast_detail oecd
+		INNER JOIN pms_expense e ON
+		oecd.expense_id = e.id
+		INNER JOIN pms_project p ON oecd.project_id
+		=
+		p.id
+		INNER JOIN pms_department d ON oecd.department_id = d.id
+		<where>
+			oecd.expense_cast_id = #{id}
+		</where>
+	</select>
+
+	<select id="listByPageAndParam" parameterType="java.util.Map"
+		resultMap="beanMap">
+		SELECT oec.id, oec.cast_code, oec.cast_type, oec.voucher_number,
+		c.id
+		AS company_id,
+		c.company_name,
+		e.id AS employee_id, e.emp_name AS
+		employee_name,
+		oec.pre_tax_cast, oec.tas_money, oec.after_tax_cast,
+		oec.create_date,
+		oec.description, oec.approval_status
+		FROM
+		pms_expense_cast
+		oec INNER
+		JOIN pms_company c ON
+		oec.pay_subject = c.id
+		INNER JOIN
+		pms_employee e ON
+		oec.employee_id = e.id
+		<where>
+			<include refid="condition_sql" />
+		</where>
+		order by oec.create_date desc, oec.cast_code asc, oec.approval_status
+		asc
+	</select>
+
+	<select id="findReportById" resultMap="reportMap"
+		parameterType="Long">
+		SELECT d.id AS department_id, d.dept_name AS
+		department_name,
+		p.id AS project_id, p.project_name,
+		e.id AS expense_id,
+		e.expense_name, t.pre_tax_cast FROM (
+		SELECT
+		department_id, project_id,
+		expense_id,
+		SUM(pre_tax_cast) AS pre_tax_cast
+		FROM
+		pms_expense_cast_detail
+		WHERE expense_cast_id = #{id}
+		GROUP BY
+		department_id, project_id, expense_id) t
+		INNER JOIN pms_department d ON
+		t.department_id = d.id
+		INNER JOIN pms_project p ON t.project_id = p.id
+		INNER JOIN pms_expense e ON t.expense_id = e.id
+	</select>
+</mapper>

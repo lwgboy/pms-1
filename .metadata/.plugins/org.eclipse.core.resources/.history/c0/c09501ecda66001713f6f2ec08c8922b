@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.yesway.pms.core.cast.resource.dao.ResourceAmountDaoImpl">
+
+	<sql id="pms_resource_amount"> pms_resource_amount </sql>
+	<sql id="pms_resource_amount_detail"> pms_resource_amount_detail </sql>
+	<sql id="pms_resource_amount_project_detail"> pms_resource_amount_project_detail </sql>
+
+	<resultMap id="beanMap" type="ResourceAmount">
+		<id column="id" property="id" />
+		<result column="resource_id" property="resourceId" />
+		<result column="resource_name" property="resourceName" />
+		<result column="create_date" property="createDate" />
+		<result column="approval_status" property="status"
+			typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler" javaType="cn.yesway.pms.common.enums.ApprovalStatus" />
+		<result column="description" property="description" />
+		<collection property="details" ofType="ResourceAmountDetail"
+			column="id" select="findDetailById">
+		</collection>
+	</resultMap>
+
+	<resultMap id="detailBeanMap" type="ResourceAmountDetail">
+		<id column="id" property="id" />
+		<result column="resource_amount_id" property="resourceAmountId" />
+		<result column="project_id" property="projectId" />
+		<result column="project_name" property="projectName" />
+		<result column="amount" property="amount" />
+		<result column="scale" property="scale" />
+		<result column="description" property="description" />
+	</resultMap>
+
+	<insert id="insert" parameterType="ResourceAmount" keyProperty="id"
+		useGeneratedKeys="true">
+		insert into
+		<include refid="pms_resource_amount" />
+		(approval_status, affiliation_date) values (#{status.value},
+		#{affiliationDate})
+	</insert>
+
+	<insert id="insertDetail" parameterType="ResourceAmountDetail"
+		keyProperty="id" useGeneratedKeys="true">
+		insert into
+		<include refid="pms_resource_amount_detail" />
+		(resource_amount_id, resource_code)
+		values
+		(#{resourceAmountId},
+		#{resource.code})
+	</insert>
+
+	<insert id="insertProjectDetail" parameterType="ResourceAmountDetail">
+		insert into
+		<include refid="pms_resource_amount_project_detail" />
+		(resource_amount_detail_id, project_code, scale)
+		values
+		<foreach collection="details" item="detail" separator=","
+			close=";">
+			(#{id}, #{detail.project.code}, #{detail.scale})
+		</foreach>
+	</insert>
+
+	<update id="updateStatus" parameterType="ResourceAmount">
+		update
+		<include refid="pms_resource_amount" />
+		set approval_status = #{status.value}
+		<where>
+			id = #{id}
+		</where>
+	</update>
+
+	<select id="listByPageAndParam" parameterType="java.util.Map"
+		resultMap="beanMap">
+		SELECT ra.id, ra.approval_status, ra.affiliation_date,
+		(SELECT COUNT(0)
+		FROM pms_resource_cast rc WHERE rc.affiliation_date =
+		ra.affiliation_date) AS hasCast
+		FROM
+		<include refid="pms_resource_amount" />
+		ra;
+		<where>
+			<if
+				test="fromDate != null and fromDate != '' and toDate != null and toDate != ''">
+				ra.create_date between #{fromDate} and #{toDate}
+			</if>
+			<if test="resourceId != null and resourceId != ''">
+				resource_id = #{resourceId}
+			</if>
+		</where>
+		<![CDATA[
+        order by ra.create_date desc
+        ]]>
+	</select>
+
+	<select id="countByParam" parameterType="java.util.Map"
+		resultType="Long">
+		select count(0) from
+		<include refid="pms_resource_amount" />
+		<where>
+			resource_id = #{resourceId} and
+			MONTH(create_date) =
+			#{month} and
+			YEAR(create_date) = #{year}
+		</where>
+	</select>
+
+</mapper>

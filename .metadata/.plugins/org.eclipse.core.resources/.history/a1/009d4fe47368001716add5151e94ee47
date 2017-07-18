@@ -1,0 +1,11 @@
+package cn.yesway.pms.core.cast.resource.dao;
+
+import org.springframework.stereotype.Component;
+
+import cn.yesway.pms.common.core.dao.BaseDaoImpl;
+import cn.yesway.pms.core.cast.resource.entity.ResourceCastReport;
+
+@Component("ResourceCastReportDao")
+public class ResourceCastReportDaoImpl extends BaseDaoImpl<ResourceCastReport> implements ResourceCastReportDao {
+
+}

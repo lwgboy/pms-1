@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.yesway.pms.generator.dao.BusinessCodeGeneratorDaoImpl">
+
+	<sql id="update_sql">
+		<set>
+			<if test="number != null and number != ''">
+				number = #{number} ,
+			</if>
+			<if test="date != null">
+				generator_date = #{date} ,
+			</if>
+		</set>
+	</sql>
+
+	<resultMap id="beanMap" type="GeneratorConfig">
+		<result property="id" column="id" />
+		<result property="seed" column="seed" />
+		<result property="prefix" column="prefix" />
+		<result property="formatter" column="formatter" />
+		<result property="digit" column="digit" />
+		<result property="number" column="number" />
+		<result property="date" column="generator_date" />
+	</resultMap>
+
+
+	<update id="update" parameterType="GeneratorConfig">
+		update
+		pms_generator
+		<include refid="update_sql" />
+		<where>
+			seed = #{seed}
+		</where>
+	</update>
+
+	<select id="findBySeed" parameterType="String" resultMap="beanMap">
+		SELECT id, seed, prefix, formatter, digit, number, generator_date FROM
+		pms_generator
+		<where>
+			seed = #{seed}
+		</where>
+	</select>
+
+</mapper>

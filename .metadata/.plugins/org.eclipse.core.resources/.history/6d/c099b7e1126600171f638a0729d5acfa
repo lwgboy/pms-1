@@ -1,0 +1,16 @@
+package cn.yesway.pms.core.cast.resource.entity;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
+
+import cn.yesway.pms.common.entity.BaseEntity;
+
+public class ResourceAmountDetail extends BaseEntity {
+
+    private static final long serialVersionUID = 435983762111288133L;
+    
+    private Resource resource;
+    
+    
+}

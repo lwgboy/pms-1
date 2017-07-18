@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.yesway.pms.core.report.dao.WorkscheduleReportDaoImpl">
+
+	<sql id="condition_sql">
+		<if test="employeeIds != null and employeeIds != ''">
+			and
+			ws.employee_id
+			<foreach collection="employeeIds" item="employeeId" open="in ("
+				close=")" separator=",">
+				#{employeeId}
+			</foreach>
+		</if>
+		<if test="departmentId != null and departmentId != ''">
+			and d.id IN (SELECT id FROM pms_department WHERE id =
+			#{departmentId} OR
+			pid = #{departmentId})
+		</if>
+		<if
+			test="fromDate != null and fromDate != '' and toDate != null and toDate != ''">
+			AND ws.create_date BETWEEN #{fromDate} AND #{toDate}
+		</if>
+		<if test="projectId != null and projectId != ''">
+			AND wsd.project_id = #{projectId}
+		</if>
+		<if test="projectIds != null and projectIds != ''">
+			AND
+			p.id
+			<foreach collection="projectIds" item="projectId" open="in ("
+				close=")" separator=",">
+				#{projectId}
+			</foreach>
+		</if>
+	</sql>
+
+	<resultMap id="projectWorkscheduleReportMap" type="ProjectWorkscheduleReport">
+		<result column="project_id" property="project.id" />
+		<result column="project_name" property="project.name" />
+		<result column="alias_name" property="project.aliasName" />
+		<result column="work_time" property="workTime" />
+	</resultMap>
+
+	<resultMap id="employeeWorkscheduleReportMap" type="EmployeeWorkscheduleReport">
+		<result column="employee_id" property="employee.id" />
+		<result column="employee_name" property="employee.name" />
+		<result column="work_time" property="workTime" />
+	</resultMap>
+
+	<resultMap id="departmentWorkscheduleReportMap" type="DepartmentWorkscheduleReport">
+		<result column="department_id" property="department.id" />
+		<result column="department_name" property="department.name" />
+		<result column="work_time" property="workTime" />
+	</resultMap>
+
+	<resultMap id="workscheduleReportDetailMap" type="WorkscheduleReportDetail">
+		<result column="employee_id" property="employee.id" />
+		<result column="employee_name" property="employee.name" />
+		<result column="department_id" property="department.id"></result>
+		<result column="department_name" property="department.name"></result>
+		<result column="project_id" property="project.id"></result>
+		<result column="project_name" property="project.name"></result>
+		<result column="create_date" property="createDate"></result>
+		<result column="work_time" property="workTime"></result>
+		<result column="description" property="description"></result>
+	</resultMap>
+
+	<resultMap id="workscheduleCountReportMap" type="WorkscheduleCountReport">
+		<result column="employee_name" property="name" />
+		<result column="num" property="num" />
+	</resultMap>
+
+	<select id="listProjectWorkscheduleReportByParam" parameterType="java.util.Map"
+		resultMap="projectWorkscheduleReportMap">
+		SELECT
+		wsd.project_id,
+		p.project_name,
+		p.alias_name,
+		SUM(wsd.work_time) AS
+		work_time
+		FROM
+		pms_workschedule_detail wsd
+		INNER JOIN pms_workschedule ws
+		ON
+		wsd.workschedule_id = ws.id
+		INNER JOIN pms_employee e
+		ON
+		ws.employee_id =
+		e.id
+		INNER JOIN pms_project p
+		ON wsd.project_id = p.id
+		<where>
+			<include refid="condition_sql" />
+			AND ws.approval_status &gt; 0
+		</where>
+		GROUP BY wsd.project_id,
+		p.project_name
+	</select>
+
+	<select id="listEmployeeWorkscheduleReportByParam"
+		parameterType="java.util.Map" resultMap="employeeWorkscheduleReportMap">
+		SELECT
+		e.id AS employee_id,
+		e.emp_name AS employee_name,
+		SUM(wsd.work_time) AS work_time
+		FROM
+		pms_workschedule_detail wsd
+		INNER
+		JOIN pms_workschedule ws
+		ON
+		wsd.workschedule_id = ws.id
+		INNER JOIN
+		pms_employee e
+		ON ws.employee_id
+		= e.id
+		INNER JOIN pms_project p
+		ON
+		wsd.project_id = p.id
+		<where>
+			<include refid="condition_sql" />
+			AND ws.approval_status &gt; 0
+		</where>
+		GROUP BY e.id,
+		e.emp_name
+	</select>
+
+	<select id="listDepartmentWorkscheduleReportByParam"
+		parameterType="java.util.Map" resultMap="departmentWorkscheduleReportMap">
+		SELECT
+		d.id AS department_id,
+		d.dept_name AS department_name,
+		SUM(work_time) AS work_time
+		FROM
+		pms_workschedule_detail wsd
+		INNER JOIN
+		pms_workschedule ws
+		ON
+		wsd.workschedule_id = ws.id
+		INNER JOIN pms_project
+		p
+		ON wsd.project_id =
+		p.id
+		INNER JOIN pms_employee e
+		ON ws.employee_id =
+		e.id
+		INNER JOIN
+		pms_department d
+		ON e.department_id = d.id
+		<where>
+			ws.approval_status &gt; 0
+			<include refid="condition_sql" />
+		</where>
+		GROUP BY d.id, d.dept_name
+	</select>
+
+	<select id="listDetailByParam" parameterType="java.util.Map"
+		resultMap="workscheduleReportDetailMap">
+		SELECT
+		e.id AS employee_id,
+		e.emp_name AS employee_name,
+		d.id
+		AS
+		department_id,
+		d.dept_name AS department_name,
+		p.id AS project_id,
+		p.project_name AS project_name,
+		ws.create_date,
+		wsd.work_time,
+		wsd.description
+		FROM
+		pms_workschedule_detail wsd
+		INNER JOIN
+		pms_workschedule ws
+		ON wsd.workschedule_id = ws.id
+		INNER JOIN
+		pms_project p
+		ON wsd.project_id = p.id
+		INNER JOIN pms_employee e
+		ON
+		ws.employee_id = e.id
+		INNER JOIN pms_department d
+		ON e.department_id =
+		d.id
+		<where>
+			ws.employee_id
+			<foreach collection="employeeIds" item="employeeId" open="in ("
+				close=")" separator=",">
+				#{employeeId}
+			</foreach>
+			AND p.id = #{projectId}
+			<if
+				test="fromDate != null and fromDate != '' and toDate != null and toDate != ''">
+				AND ws.create_date BETWEEN #{fromDate} AND #{toDate}
+			</if>
+			AND ws.approval_status &gt; 0
+		</where>
+		ORDER BY ws.create_date DESC
+	</select>
+
+	<select id="listWorkscheduleCountByParam" parameterType="java.util.Map"
+		resultMap="workscheduleCountReportMap">
+		SELECT e.emp_name AS employee_name, COUNT(e.emp_name) AS num
+		FROM
+		pms_workschedule ws
+		INNER JOIN pms_employee e ON ws.employee_id =
+		e.id
+		INNER JOIN pms_department d ON e.department_id = d.id
+		WHERE d.id =
+		#{departmentId} AND ws.approval_status > 0
+		<if
+			test="fromDate != null and fromDate != '' and toDate != null and toDate != ''">
+			AND ws.create_date BETWEEN #{fromDate} AND #{toDate}
+		</if>
+		GROUP BY e.emp_name
+		ORDER BY
+		num DESC
+	</select>
+</mapper>

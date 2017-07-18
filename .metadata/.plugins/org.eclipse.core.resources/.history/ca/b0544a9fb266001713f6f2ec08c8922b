@@ -1,0 +1,41 @@
+package cn.yesway.pms.core.cast.resource.entity;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import cn.yesway.pms.common.entity.BaseEntity;
+import cn.yesway.pms.common.enums.ApprovalStatus;
+
+public class ResourceAmount extends BaseEntity {
+
+	private static final long serialVersionUID = -5694338109476781856L;
+	private Date affiliationDate;
+	private ApprovalStatus status;
+	private List<ResourceAmountDetail> details = new ArrayList<>();
+
+	public Date getAffiliationDate() {
+		return affiliationDate;
+	}
+
+	public void setAffiliationDate(Date affiliationDate) {
+		this.affiliationDate = affiliationDate;
+	}
+
+	public ApprovalStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(ApprovalStatus status) {
+		this.status = status;
+	}
+
+	public List<ResourceAmountDetail> getDetails() {
+		return details;
+	}
+
+	public void setDetails(List<ResourceAmountDetail> details) {
+		this.details = details;
+	}
+
+}

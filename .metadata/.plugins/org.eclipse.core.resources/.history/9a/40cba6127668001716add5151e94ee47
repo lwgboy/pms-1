@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.yesway.pms.core.cast.resource.dao.ResourceCastReportDaoImpl">
+
+	<resultMap id="beanMap" type="ResourceCastReport">
+		<result column="affiliation_date" property="affiliationDate" />
+		<result column="pre_tax_cast" property="preTaxCast" />
+		<result column="tas_money" property="tasMoney" />
+		<result column="after_tax_cast" property="afterTaxCast" />
+		<result column="approval_status" property="status"
+            typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler" javaType="cn.yesway.pms.common.enums.ApprovalStatus" />
+	</resultMap>
+
+	<select id="listByPageAndParam" parameterType="java.util.Map"
+		resultMap="beanMap">
+		select
+		rc.affiliation_date, rc.pre_tax_cast, rc.tas_money,
+		rc.after_tax_cast, rc.approval_status
+		from
+		pms_resource_cast rc
+		inner join
+		pms_resource_amount ra
+		on rc.affiliation_date = ra.affiliation_date
+		where rc.approval_status = 1 and ra.approval_status = 1
+		order by
+		rc.affiliation_date desc
+	</select>
+
+</mapper>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="cn.yesway.pms.core.cast.employee.dao.WorkscheduleConfirmDaoImpl">
+
+	<resultMap id="beanMap" type="WorkscheduleConfirm">
+		<id column="id" property="id" />
+		<result column="workschedule_id" property="workscheduleId" />
+		<result column="project_id" property="projectId" />
+		<result column="project_name" property="projectName" />
+		<result column="work_time" property="workTime" />
+		<result column="employee_id" property="employeeId" />
+		<result column="employee_name" property="employeeName" />
+		<result column="create_date" property="createDate" />
+		<result column="work_time" property="workTime" />
+		<result column="description" property="description" />
+		<result column="is_confirm" property="confirmed"></result>
+	</resultMap>
+
+
+	<select id="listByPageAndParam" parameterType="java.util.Map"
+		resultMap="beanMap">
+		SELECT
+		wd.id,
+		wd.workschedule_id,
+		wd.project_id,
+		p.project_name,
+		wd.work_time,
+		wd.description,
+		w.employee_id,
+		e.emp_name AS
+		employee_name,
+		w.create_date,
+		wd.is_confirm
+		FROM
+		pms_workschedule_detail
+		wd
+		INNER JOIN
+		pms_workschedule w
+		ON wd.workschedule_id = w.id
+		INNER JOIN
+		pms_employee e
+		ON w.employee_id = e.id
+		INNER JOIN pms_project p
+		ON
+		wd.project_id = p.id
+		WHERE wd.project_id IN (SELECT project_id FROM
+		pms_project_permission
+		WHERE
+		employee_id = #{employeeId})
+		AND
+		w.approval_status = 3 and
+		wd.is_confirm = 0
+		<if test="projectId != null and projectId != ''">
+			AND wd.project_id = #{projectId}
+		</if>
+		<if test="subordinate != null and subordinate != ''">
+			AND w.employee_id = #{subordinate}
+		</if>
+		<if test="departmentId != null and departmentId != ''">
+			AND e.department_id = #{departmentId}
+		</if>
+		<if
+			test="fromDate != null and fromDate != '' and toDate != null and toDate != ''">
+			AND w.create_date between #{fromDate} and #{toDate}
+		</if>
+		ORDER BY w.create_date DESC
+	</select>
+
+
+	<update id="updateStatus" parameterType="Long[]">
+		update
+		pms_workschedule_detail
+		set is_confirm = 1
+		<where>
+			id
+			<foreach collection="array" item="id" open="in (" close=")"
+				separator=",">
+				#{id}
+			</foreach>
+		</where>
+	</update>
+
+</mapper>

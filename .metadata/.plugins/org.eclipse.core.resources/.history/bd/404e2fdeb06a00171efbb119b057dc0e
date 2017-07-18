@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.yesway.pms.core.report.dao.ProjectReportCastDaoImpl">
+
+	<resultMap id="projectWorkTimeMap" type="ProjectWorkTime">
+		<result property="employee.id" column="employee_id" />
+		<result property="name" column="expense_name" />
+		<result property="type" column="expense_type"
+			typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler" javaType="cn.yesway.pms.common.enums.ExpenseType" />
+		<result property="description" column="description" />
+		<result property="deleted" column="is_deleted" />
+	</resultMap>
+
+	<select id="selectWorkTime" parameterType="java.util.Map">
+		select ws.employee_id, wsd.project_id, sum(wsd.work_time) as work_time
+		from pms_workschedule_detail wsd inner join pms_workschedule ws on
+		wsd.workschedule_id = ws.id
+		where ws.create_date between '2017-06-01' and '2017-06-30'
+		group by ws.employee_id, wsd.project_id
+	</select>
+
+</mapper>

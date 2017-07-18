@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.yesway.pms.core.function.dao.FunctionDaoImpl">
+
+	<sql id="table"> pms_function </sql>
+
+	<resultMap id="beanMap" type="Function">
+		<id column="id" property="id" />
+		<result column="pid" property="parentId" />
+		<result column="function_name" property="name" />
+		<result column="function_url" property="url" />
+		<result column="icon" property="icon" />
+		<result column="function_level" property="level" />
+		<result column="description" property="description" />
+		<result column="order_id" property="orderId" />
+		<result column="gmt_create" property="gmtCreate" />
+		<result column="gmt_modified" property="gmtModified" />
+	</resultMap>
+
+	<!-- 查找功能项 -->
+	<select id="listByParam" parameterType="Long" resultMap="beanMap">
+		select id, pid, function_name, function_url, icon, function_level from
+		<include refid="table" />
+		<where>
+			<if test="employeeId != null">
+				and id in (select function_id from pms_permission where
+				employee_id =
+				#{employeeId})
+			</if>
+			<if test="type != null and type != ''">
+				and function_type = #{type}
+			</if>
+		</where>
+		order by function_level asc, order_id asc
+	</select>
+</mapper>

@@ -1,0 +1,5 @@
+package cn.yesway.pms.core.report.dao;
+
+public interface ProjectReportCastDao {
+
+}

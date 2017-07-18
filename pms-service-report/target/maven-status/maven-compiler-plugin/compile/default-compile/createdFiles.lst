@@ -1,0 +1,8 @@
+cn\yesway\pms\core\report\entity\EmployeeWorkscheduleReport.class
+cn\yesway\pms\core\report\dao\WorkscheduleReportDaoImpl.class
+cn\yesway\pms\core\report\dao\WorkscheduleReportDao.class
+cn\yesway\pms\core\report\entity\WorkscheduleReportDetail.class
+cn\yesway\pms\core\report\biz\WorkscheduleReportBiz.class
+cn\yesway\pms\core\report\entity\ProjectWorkscheduleReport.class
+cn\yesway\pms\core\report\entity\WorkscheduleReport.class
+cn\yesway\pms\core\report\entity\DepartmentWorkscheduleReport.class
