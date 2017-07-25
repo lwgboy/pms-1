@@ -1,8 +1,11 @@
 package cn.yesway.pms.web.console.controller;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +13,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import cn.yesway.pms.common.page.PageBean;
 import cn.yesway.pms.common.page.PageParam;
@@ -18,7 +23,9 @@ import cn.yesway.pms.common.web.entity.WebAppResult;
 import cn.yesway.pms.common.web.entity.WebConstant;
 import cn.yesway.pms.common.web.enums.ResultStatus;
 import cn.yesway.pms.core.cast.employee.biz.WorkscheduleBiz;
+import cn.yesway.pms.core.cast.employee.biz.WorkscheduleMonthBiz;
 import cn.yesway.pms.core.cast.employee.entity.Workschedule;
+import cn.yesway.pms.core.cast.employee.entity.WorkscheduleMonth;
 import cn.yesway.pms.core.employee.entity.Employee;
 
 @RestController
@@ -27,6 +34,46 @@ public class WorkscheduleController {
 
 	@Autowired
 	private WorkscheduleBiz workscheduleBiz;
+	@Autowired
+	private WorkscheduleMonthBiz workscheduleMonthBiz;
+
+	@RequestMapping(value = "/workSchedule/month/upload", method = RequestMethod.POST)
+	public WebAppResult upload(@RequestParam("file") MultipartFile file, HttpServletRequest request)
+			throws IOException {
+		// 获得上传文件夹的路径。
+		String folderPath = request.getSession().getServletContext().getRealPath("/WEB-INF/upload/workschedule");
+		// 获得上传文件的文件名称。
+		String fileName = file.getOriginalFilename();
+		// 定义上传路径，如果目录不存在则创建
+		File output = new File(folderPath, fileName);
+		if (!output.exists()) {
+			output.mkdirs();
+		}
+		// 上传文件
+		file.transferTo(output);
+		workscheduleMonthBiz.importFile(output.getPath());
+		return new WebAppResult(ResultStatus.SUCCESS, "上传成功", null);
+	}
+
+	@RequestMapping(value = "/workSchedule/month/list", method = RequestMethod.POST)
+	public WebAppResult monthlist(@RequestBody Map<String, Object> map) {
+		PageParam pageParam = new PageParam(Integer.parseInt(map.get("pageNum").toString()),
+				Integer.parseInt(map.get("numPerPage").toString()));
+		PageBean<WorkscheduleMonth> data = workscheduleMonthBiz.listByPageAndParam(pageParam, map);
+		return new WebAppResult(ResultStatus.SUCCESS, "", data);
+	}
+	
+	@RequestMapping(value = "/workSchedule/month/delete/{id}", method = RequestMethod.GET)
+	public WebAppResult monthlist(@PathVariable Long id) {
+		workscheduleMonthBiz.delete(id);
+		return new WebAppResult(ResultStatus.SUCCESS, "", null);
+	}
+	
+	@RequestMapping(value = "/workSchedule/month/updateStatus", method = RequestMethod.POST)
+	public WebAppResult monthUpdateStatus(@RequestBody WorkscheduleMonth workscheduleMonth) {
+		workscheduleMonthBiz.updateStatus(workscheduleMonth);
+		return new WebAppResult(ResultStatus.SUCCESS, "", null);
+	}
 
 	@RequestMapping(value = "/workSchedule/save", method = RequestMethod.POST)
 	public WebAppResult save(@RequestBody Workschedule workschedule, HttpSession httpSession) {
@@ -86,7 +133,7 @@ public class WorkscheduleController {
 		}
 		return new WebAppResult(ResultStatus.TIMEOUT, "", null);
 	}
-	
+
 	@RequestMapping(value = "/workSchedule/back", method = RequestMethod.POST)
 	public WebAppResult approvalFail(@RequestBody Workschedule workschedule, HttpSession httpSession) {
 		Employee employee = (Employee) httpSession.getAttribute(WebConstant.SESSION_NAME);

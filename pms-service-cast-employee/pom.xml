@@ -33,6 +33,11 @@
             <artifactId>pms-service-employee</artifactId>
             <version>${pms-service-employee.version}</version>
         </dependency>
+        <dependency>
+            <groupId>cn.yesway</groupId>
+            <artifactId>pms-service-project</artifactId>
+            <version>${pms-service-project.version}</version>
+        </dependency>
 
 		<!-- poi -->
 		<dependency>

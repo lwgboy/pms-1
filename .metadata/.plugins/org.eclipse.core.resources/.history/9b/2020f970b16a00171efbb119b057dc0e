@@ -1,8 +1,0 @@
-package cn.yesway.pms.core.report.dao;
-
-import cn.yesway.pms.common.core.dao.BaseDao;
-import cn.yesway.pms.core.report.entity.ProjectCastReport;
-
-public interface ProjectReportCastDao extends BaseDao<ProjectCastReport> {
-
-}

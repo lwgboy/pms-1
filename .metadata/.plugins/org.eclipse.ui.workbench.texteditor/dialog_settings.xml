@@ -2,28 +2,28 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="resourceCastMap" key="selection"/>
+		<item value="workschedule_month_id" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
-			<item value="resourceCastMap"/>
-			<item value="beanMap"/>
-			<item value="listByRunning"/>
-			<item value="listByParam"/>
+			<item value="workschedule_month_id"/>
+			<item value="WorkscheduleMonthDetail"/>
+			<item value="insertProjectDetail"/>
+			<item value="projectCode"/>
 			<item value="employeeSalaryMap"/>
+			<item value="findListByPageAndParam"/>
 			<item value="selectEmployeeSalary"/>
-			<item value="expenseBiz"/>
-			<item value="ExpenseBiz"/>
+			<item value="resourceCastMap"/>
 		</list>
 		<list key="replacehistory">
 		</list>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
 		<item value="273" key="DIALOG_WIDTH"/>
-		<item value="1|微软雅黑|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|微软雅黑" key="DIALOG_FONT_NAME"/>
-		<item value="399" key="DIALOG_HEIGHT"/>
+		<item value="1|Microsoft YaHei UI|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|5|0|Microsoft YaHei UI" key="DIALOG_FONT_NAME"/>
+		<item value="400" key="DIALOG_HEIGHT"/>
 		<item value="1093" key="DIALOG_X_ORIGIN"/>
 		<item value="171" key="DIALOG_Y_ORIGIN"/>
 	</section>

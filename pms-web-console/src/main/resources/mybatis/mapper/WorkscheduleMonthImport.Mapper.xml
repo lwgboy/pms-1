@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.yesway.pms.core.cast.employee.dao.WorkscheduleMonthDaoImpl">
+
+	<resultMap id="beanMap" type="WorkscheduleMonth">
+		<id column="id" property="id" />
+		<result column="affiliation_date" property="affiliationDate" />
+		<result column="worktime" property="worktime" />
+		<result column="approval_status" property="status"
+			typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler" javaType="cn.yesway.pms.common.enums.ApprovalStatus" />
+	</resultMap>
+
+	<resultMap id="detailBeanMap" type="WorkscheduleMonthDetail">
+		<id column="id" property="id" />
+		<result column="employee_code" property="employee.code" />
+		<result column="employee_name" property="employee.name" />
+	</resultMap>
+
+	<resultMap id="detailProjectBeanMap" type="WorkscheduleMonthProjectDetail">
+		<id column="id" property="id" />
+		<result column="project_code" property="project.code" />
+		<result column="project_name" property="project.name" />
+		<result column="worktime" property="worktime" />
+	</resultMap>
+
+	<insert id="insert" parameterType="WorkscheduleMonth"
+		keyProperty="id" useGeneratedKeys="true">
+		insert into pms_workschedule_month
+		(affiliation_date, worktime, approval_status) values
+		(#{affiliationDate}, #{worktime}, #{status.value})
+	</insert>
+
+	<insert id="insertDetail" parameterType="WorkscheduleMonthDetail"
+		keyProperty="id" useGeneratedKeys="true">
+		insert into
+		pms_workschedule_month_detail(workschedule_month_id,
+		employee_code)
+		values
+		(#{workscheduleMonthId},#{employee.code})
+	</insert>
+
+	<insert id="insertProjectDetail" parameterType="WorkscheduleMonthDetail"
+		keyProperty="id" useGeneratedKeys="true">
+		insert into pms_workschedule_month_project_detail
+		(workschedule_month_detail_id, project_code, worktime) values
+		<foreach collection="details" item="detail" separator=","
+			close=";">
+			(#{id},#{detail.project.code},#{detail.worktime})
+		</foreach>
+	</insert>
+
+	<delete id="deleteById" parameterType="Long">
+		delete from
+		pms_workschedule_month where id = #{id}
+	</delete>
+
+	<delete id="deleteDetail" parameterType="Long">
+		delete from
+		pms_workschedule_month_detail where workschedule_month_id =
+		#{id}
+	</delete>
+
+	<delete id="deleteProjectDetail" parameterType="Long">
+		delete from
+		pms_workschedule_month_project_detail where
+		workschedule_month_detail_id IN (
+		select id from
+		pms_workschedule_month_detail where workschedule_month_id
+		= #{id}
+		)
+	</delete>
+
+	<update id="updateStatus" parameterType="WorkscheduleMonth">
+		update
+		pms_workschedule_month
+		set approval_status = #{status.value}
+		<where>
+			id = #{id}
+		</where>
+	</update>
+
+	<select id="listByPageAndParam" parameterType="java.util.Map"
+		resultMap="beanMap">
+		SELECT id, approval_status, affiliation_date, worktime  
+		FROM
+		pms_workschedule_month
+		<where>
+			<if
+				test="fromDate != null and fromDate != '' and toDate != null and toDate != ''">
+				affiliation_date between #{fromDate} and #{toDate}
+			</if>
+		</where>
+		<![CDATA[
+        order by affiliation_date desc
+        ]]>
+	</select>
+
+	<select id="countByParam" parameterType="java.util.Map"
+		resultType="Long">
+		select count(0) from
+		pms_workschedule_month
+		<where>
+			MONTH(affiliation_date) =
+			#{month} and
+			YEAR(affiliation_date) =
+			#{year}
+		</where>
+	</select>
+
+</mapper>

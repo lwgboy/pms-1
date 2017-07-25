@@ -1,7 +1,0 @@
-package cn.yesway.pms.core.cast.resource.entity;
-
-import cn.yesway.pms.common.entity.BaseEntity;
-
-public class ResourceCastReportDetail extends BaseEntity {
-
-}

@@ -13,6 +13,8 @@
 		<result property="employee.id" column="employee_id" />
 		<result property="employee.code" column="employee_code" />
 		<result property="value" column="hourly_salary" />
+		<result property="value1" column="monthly_salary" />
+		
 	</resultMap>
 
 	<resultMap id="expenseCastMap" type="ProjectExpenseCast">
@@ -47,13 +49,13 @@
 
 	<select id="selectEmployeeSalary" parameterType="java.util.Map"
 		resultMap="employeeSalaryMap">
-		SELECT e.id as employee_id, esd.employee_code,
-		esd.hourly_salary FROM
-		pms_employee_salary_detail esd
-		INNER JOIN
-		pms_employee_salary es ON
-		esd.employee_salary_id = es.id inner join
-		pms_employee e on esd.employee_code = e.emp_code
+		SELECT e.id AS employee_id, esd.employee_code, esd.monthly_salary,
+        esd.hourly_salary FROM
+        pms_employee_salary_detail esd
+        INNER JOIN
+        pms_employee_salary es ON
+        esd.employee_salary_id = es.id INNER JOIN
+        pms_employee e ON esd.employee_code = e.emp_code
 		WHERE create_date
 		BETWEEN #{fromDate}
 		AND #{toDate}

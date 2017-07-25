@@ -1,7 +1,0 @@
-package cn.yesway.pms.core.report.dao;
-
-import cn.yesway.pms.common.core.dao.BaseDaoImpl;
-
-public class ProjectReportCastDaoImpl extends BaseDaoImpl<ProjectCastReport> implements  {
-
-}

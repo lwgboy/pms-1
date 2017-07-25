@@ -65,7 +65,6 @@ public class SalaryController {
 			return new WebAppResult(ResultStatus.SUCCESS, "删除成功", null);
 		}
 		return new WebAppResult(ResultStatus.FAIL, "已提交的薪资表不能删除", null);
-
 	}
 
 	@RequestMapping(value = "salary/update", method = RequestMethod.POST)
